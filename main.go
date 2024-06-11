@@ -7,7 +7,6 @@ import (
 	"github.com/CeoFred/gin-boilerplate/constants"
 	"github.com/CeoFred/gin-boilerplate/database"
 	"github.com/CeoFred/gin-boilerplate/internal/helpers"
-	"github.com/CeoFred/gin-boilerplate/internal/otp"
 	"github.com/CeoFred/gin-boilerplate/internal/routes"
 
 	"flag"
@@ -43,8 +42,7 @@ func main() {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	constant := constants.New()
-	_ = otp.NewOTPManager()
-
+	
 	ctx := context.Background()
 
 	v := constants.New()

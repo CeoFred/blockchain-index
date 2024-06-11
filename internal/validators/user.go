@@ -10,12 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ValidateRegisterUserSchema(c *gin.Context) {
-	var body handlers.InputCreateUser
-	bindAndValidate(c, &body)
-	c.Set("validatedRequestBody", body)
-	c.Next()
-}
+
 
 func ValidateAccountResetScheme(c *gin.Context) {
 	var body helpers.AccountReset
@@ -31,12 +26,7 @@ func ValidateOTPVerifySchema(c *gin.Context) {
 	c.Next()
 }
 
-func ValidateLoginUser(c *gin.Context) {
-	var body handlers.AuthenticateUser
-	bindAndValidate(c, &body)
-	c.Set("validatedRequestBody", body)
-	c.Next()
-}
+
 
 func ValidateUpdateUserProfile(c *gin.Context) {
 	var body handlers.UpdateUserProfileInput
@@ -45,26 +35,6 @@ func ValidateUpdateUserProfile(c *gin.Context) {
 	c.Next()
 }
 
-func ValidateResetUserSchema(c *gin.Context) {
-	var body handlers.ForgotPasswordInput
-	bindAndValidate(c, &body)
-	c.Set("validatedRequestBody", body)
-	c.Next()
-}
-
-func ValidateResetPasswordSchema(c *gin.Context) {
-	var body handlers.ResetPasswordInput
-	bindAndValidate(c, &body)
-	c.Set("validatedRequestBody", body)
-	c.Next()
-}
-
-func ValidateResetOTPVerifySchema(c *gin.Context) {
-	var body handlers.OtpVerifyInput
-	bindAndValidate(c, &body)
-	c.Set("validatedRequestBody", body)
-	c.Next()
-}
 
 func bindAndValidate(c *gin.Context, body interface{}) {
 	if err := c.ShouldBindJSON(body); err != nil {

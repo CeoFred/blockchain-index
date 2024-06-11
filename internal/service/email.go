@@ -1,18 +1,11 @@
 package service
 
 import (
-	"fmt"
-	"log"
-	"time"
-
 	"github.com/CeoFred/gin-boilerplate/constants"
-	"github.com/CeoFred/gin-boilerplate/internal/helpers"
-	"github.com/CeoFred/gin-boilerplate/internal/otp"
 	"github.com/CeoFred/gin-boilerplate/sendgrid"
 )
 
 type EmailServicer interface {
-	SendVerificationEmail(name, email, url string)
 	SendForgotPasswordEmail(name, email string)
 }
 
@@ -44,30 +37,3 @@ func (s *EmailService) SendForgotPasswordEmail(name, email string) {
 }
 
 // Sends account verification email
-func (s *EmailService) SendVerificationEmail(name, email, url string) {
-
-	otpToken, err := otp.OTPManage.GenerateOTP(email, time.Minute*10)
-	type OTP struct {
-		Otp  string
-		Name string
-		Url  string
-	}
-
-	if err != nil {
-		log.Printf("Error sending email: %v", err.Error())
-	}
-
-	verificationUrl := fmt.Sprintf("%s/api/v1/auth/verify/%s/%s", url, email, otpToken)
-
-	messageBody, err := helpers.ParseTemplateFile("verify_account.html", OTP{Otp: otpToken, Name: name, Url: verificationUrl})
-
-	if err != nil {
-		log.Printf("Error sending email: %v", err.Error())
-	}
-
-	err = s.Send(name, email, "Verify your accounf", messageBody)
-
-	if err != nil {
-		log.Printf("Error sending email: %v", err.Error())
-	}
-}
