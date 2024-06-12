@@ -4,8 +4,8 @@ tmp_dir = ".bin"
 
 [build]
   args_bin = []
-  bin = "./.bin/app"
-  cmd = "go build -tags timetzdata -o ./.bin/app ."
+  bin = "./.bin/blockchain"
+  cmd = "go build -tags timetzdata -o ./.bin/blockchain ."
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
@@ -21,7 +21,7 @@ tmp_dir = ".bin"
   stop_on_error = true
 
 [color]
-  app = ""
+  app = "red"
   build = "yellow"
   main = "magenta"
   runner = "green"

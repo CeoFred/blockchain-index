@@ -7,6 +7,6 @@ import (
 
 func Routes(r *gin.RouterGroup, db *gorm.DB) {
 
-	RegisterUserRoutes(r, db)
+	RegisterContractRoute(r, db)
 
 }

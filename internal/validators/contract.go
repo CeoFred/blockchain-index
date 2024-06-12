@@ -10,24 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ValidateAccountResetScheme(c *gin.Context) {
-	var body helpers.AccountReset
+func NewContract(c *gin.Context) {
+	var body handlers.ContractEventRequest
 	bindAndValidate(c, &body)
-	c.Set("validatedRequestBody", body)
-	c.Next()
-}
-
-func ValidateOTPVerifySchema(c *gin.Context) {
-	var body helpers.OtpVerify
-	bindAndValidate(c, &body)
-	c.Set("validatedRequestBody", body)
-	c.Next()
-}
-
-func ValidateUpdateUserProfile(c *gin.Context) {
-	var body handlers.UpdateUserProfileInput
-	bindAndValidate(c, &body)
-	c.Set("validatedRequestBody", body)
+	c.Set("validated_body", body)
 	c.Next()
 }
 
