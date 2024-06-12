@@ -11,9 +11,9 @@ import (
 )
 
 func NewContract(c *gin.Context) {
-	var body handlers.ContractEventRequest
+	var body (handlers.ContractEventRequest)
 	bindAndValidate(c, &body)
-	c.Set("validated_body", body)
+	c.Set("validatedRequestBody", body)
 	c.Next()
 }
 

@@ -4,7 +4,6 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-
 type IError struct {
 	Field string
 	Tag   string

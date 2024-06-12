@@ -15,7 +15,8 @@ type ContractInterface interface {
 	Create(contract *models.Contract) error
 	Save(contract *models.Contract) (*models.Contract, error)
 	RawCount(q string, count *int64) error
-	QueryWithArgs(q string, args ...interface{}) ([]*models.Contract, error)
+	QueryWithArgs(q string, args ...interface{}) (*models.Contract, error)
+	QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.Contract, error)
 	RawSmartSelect(q string, res interface{}, args ...interface{}) error
 }
 
@@ -72,7 +73,21 @@ func (a *ContractRepository) RawCount(q string, count *int64) error {
 	return a.database.Raw(q).Count(count).Error
 }
 
-func (a *ContractRepository) QueryWithArgs(q string, args ...interface{}) ([]*models.Contract, error) {
+func (a *ContractRepository) QueryWithArgs(q string, args ...interface{}) (*models.Contract, error) {
+	var contracts *models.Contract
+	err := a.database.Raw(q, args...).Find(&contracts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	if contracts.ID.IsNil() {
+		return nil,nil
+	}
+	
+	return contracts, nil
+}
+
+func (a *ContractRepository) QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.Contract, error) {
 	var contracts []*models.Contract
 	err := a.database.Raw(q, args...).Find(&contracts).Error
 	if err != nil {

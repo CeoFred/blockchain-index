@@ -53,6 +53,9 @@ func main() {
 		// Handle the error
 		// panic(err)
 		log.Println(err)
+	} else {
+		g.Use(apitoolkitClient.GinMiddleware)
+
 	}
 
 	// Parse command-line flags
@@ -96,8 +99,6 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 	g.MaxMultipartMemory = 8 << 20
-
-	g.Use(apitoolkitClient.GinMiddleware)
 
 	dbConfig := database.Config{
 		Host:     v.DbHost,
