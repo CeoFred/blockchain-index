@@ -1,36 +1,35 @@
 package handlers
 
 import (
-	// "context"
-	// "mime/multipart"
 	"fmt"
 	"net/http"
 	"time"
 
-	// "time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid"
 
-	// "github.com/CeoFred/gin-boilerplate/constants"
 	"github.com/CeoFred/gin-boilerplate/internal/helpers"
 	"github.com/CeoFred/gin-boilerplate/internal/models"
 	"github.com/CeoFred/gin-boilerplate/internal/repository"
 )
 
-var ()
-
 type ContractHandler struct {
 	contractRepo      repository.ContractInterface
 	contractEventRepo repository.ContractEventInterface
+	eventRepo         repository.EventInterface
+	eventLogRepo      repository.EventLogInterface
 }
 
 func NewContractHandler(contractRepo repository.ContractInterface,
 	contractEventRepo repository.ContractEventInterface,
+	eventRepo repository.EventInterface,
+	eventLogRepo repository.EventLogInterface,
 ) *ContractHandler {
 	return &ContractHandler{
 		contractRepo:      contractRepo,
 		contractEventRepo: contractEventRepo,
+		eventRepo:         eventRepo,
+		eventLogRepo:      eventLogRepo,
 	}
 }
 
@@ -85,6 +84,22 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 			helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
 			return
 		}
+
+		//TODO: check if event already exists or create
+
+		// TODO: create contract event, it's a new contact registration so the event cannot exist 
+		// create contract event if not exist
+		// ID, err = uuid.NewV7()
+		// if err != nil {
+		// 	helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
+		// 	return
+		// }
+		// contract_event := &models.ContractEvent{
+		// 	ID:ID,
+		// 	ContractID: contract.ID,
+		// 	Active: true,
+		// 	CreatedAt: time.Now(),
+		// }
 	}
 
 	helpers.ReturnJSON(c, "OK", contract, http.StatusOK)

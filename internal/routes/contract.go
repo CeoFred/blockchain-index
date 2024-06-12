@@ -16,8 +16,10 @@ func RegisterContractRoute(router *gin.RouterGroup, db *gorm.DB) {
 
 	contractRepository := repository.NewContractRepository(db)
 	contractEventRepository := repository.NewContractEventRepository(db)
+	eventRepository := repository.NewEventRepository(db)
+	eventLogRepository := repository.NewEventLogRepository(db)
 
-	handler := handlers.NewContractHandler(contractRepository,contractEventRepository)
+	handler := handlers.NewContractHandler(contractRepository, contractEventRepository, eventRepository, eventLogRepository)
 
 	contract.POST("/", validators.NewContract, handler.NewContractIndex)
 }

@@ -3,17 +3,18 @@ package main
 import (
 	"context"
 	"log"
+		"flag"
+	"fmt"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/CeoFred/gin-boilerplate/constants"
 	"github.com/CeoFred/gin-boilerplate/database"
 	"github.com/CeoFred/gin-boilerplate/internal/helpers"
 	"github.com/CeoFred/gin-boilerplate/internal/routes"
+	// "github.com/CeoFred/gin-boilerplate/internal/repository"
 
-	"flag"
-	"fmt"
-	"net/http"
-	"os"
-	"time"
 
 	_ "golang.org/x/text"
 
@@ -122,6 +123,12 @@ func main() {
 	})
 
 	v1 := g.Group("/api/v1")
+
+	//TODO: centralize dependency injection
+	// contractRepository := repository.NewContractRepository(database.DB)
+	// contractEventRepository := repository.NewContractEventRepository(database.DB)
+	// eventRepository := repository.NewEventRepository(database.DB)
+	// eventLogRepository := repository.NewEventLogRepository(database.DB)
 
 	// Bind routes
 	routes.Routes(v1, database.DB)
