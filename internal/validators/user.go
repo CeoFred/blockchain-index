@@ -10,8 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-
 func ValidateAccountResetScheme(c *gin.Context) {
 	var body helpers.AccountReset
 	bindAndValidate(c, &body)
@@ -26,15 +24,12 @@ func ValidateOTPVerifySchema(c *gin.Context) {
 	c.Next()
 }
 
-
-
 func ValidateUpdateUserProfile(c *gin.Context) {
 	var body handlers.UpdateUserProfileInput
 	bindAndValidate(c, &body)
 	c.Set("validatedRequestBody", body)
 	c.Next()
 }
-
 
 func bindAndValidate(c *gin.Context, body interface{}) {
 	if err := c.ShouldBindJSON(body); err != nil {

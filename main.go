@@ -42,7 +42,7 @@ func main() {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	constant := constants.New()
-	
+
 	ctx := context.Background()
 
 	v := constants.New()
@@ -51,7 +51,8 @@ func main() {
 	apitoolkitClient, err := apitoolkit.NewClient(ctx, apitoolkit.Config{APIKey: v.APIToolkitKey})
 	if err != nil {
 		// Handle the error
-		panic(err)
+		// panic(err)
+		log.Println(err)
 	}
 
 	// Parse command-line flags
@@ -106,7 +107,10 @@ func main() {
 		DBName:   v.DbName,
 	}
 	database.Connect(&dbConfig)
-	database.RunManualMigration(database.DB)
+
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable", v.DbUser, v.DbPassword, v.DbHost, v.DbPort, v.DbName)
+
+	database.RunManualMigration(connStr)
 	// Set up Swagger documentation
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	url := ginSwagger.URL("/swagger/doc.json") // Specify the URL for Swagger JSON
