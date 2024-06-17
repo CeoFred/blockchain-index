@@ -1,6 +1,6 @@
 module github.com/CeoFred/gin-boilerplate
 
-go 1.21.2
+go 1.21
 
 require (
 	github.com/apitoolkit/apitoolkit-go v0.0.0-20240617082746-4cb64466554c
