@@ -56,6 +56,17 @@ func init() {
 		panic("unable to register translation: alpha")
 	}
 
+	err = validate.RegisterTranslation("eth_addr", *Translator, func(ut ut.Translator) error {
+		return ut.Add("eth_addr", "{0} is not a valid ethereum address", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("eth_addr", fe.Field())
+
+		return t
+	})
+	if err != nil {
+		panic("unable to register translation: eth_addr")
+	}
+
 }
 
 func Validate(s interface{}) error {

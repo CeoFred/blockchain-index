@@ -5,3 +5,5 @@ CREATE TABLE events (
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE events ADD CONSTRAINT unique_signature UNIQUE (signature);

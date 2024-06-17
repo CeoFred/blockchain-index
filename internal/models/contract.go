@@ -17,13 +17,14 @@ type Contract struct {
 
 type ContractEvent struct {
 	ID         uuid.UUID `json:"id" gorm:"primaryKey"`
-	ContractID uuid.UUID `json:"contract_id"`
-	EventID    uuid.UUID `json:"event_id"`
-	Active     bool      `json:"active"`
-	Contract   *Contract `json:"contract" gorm:"foreignKey:ContractID"`
-	Event      *Event    `json:"event" gorm:"foreignKey:EventID"`
-	CreatedAt  time.Time `json:"created_at"`
-	DeletedAt  time.Time `json:"deleted_at"`
+	ContractID uuid.UUID `json:"contract_id" gorm:"uniqueIndex:idx_contract_event"`
+	EventID    uuid.UUID `json:"event_id" gorm:"uniqueIndex:idx_contract_event"`
+
+	Active    bool      `json:"active"`
+	Contract  *Contract `json:"contract" gorm:"foreignKey:ContractID"`
+	Event     *Event    `json:"event" gorm:"foreignKey:EventID"`
+	CreatedAt time.Time `json:"created_at"`
+	DeletedAt time.Time `json:"deleted_at"`
 }
 
 func (c *ContractEvent) TableName() string {

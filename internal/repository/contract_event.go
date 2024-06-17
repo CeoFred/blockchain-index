@@ -6,6 +6,7 @@ import (
 	"github.com/CeoFred/gin-boilerplate/internal/models"
 	"github.com/gofrs/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ContractEventInterface interface {
@@ -18,6 +19,7 @@ type ContractEventInterface interface {
 	QueryWithArgs(q string, args ...interface{}) (*models.ContractEvent, error)
 	QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.ContractEvent, error)
 	RawSmartSelect(q string, res interface{}, args ...interface{}) error
+	BatchInsert(events []*models.ContractEvent) error
 }
 
 type ContractEventRepository struct {
@@ -93,4 +95,11 @@ func (a *ContractEventRepository) QueryRecordsWithArgs(q string, args ...interfa
 
 func (a *ContractEventRepository) RawSmartSelect(q string, res interface{}, args ...interface{}) error {
 	return a.database.Raw(q, args...).Scan(res).Error
+}
+
+func (a *ContractEventRepository) BatchInsert(events []*models.ContractEvent) error {
+	return a.database.Table("contract_events").Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "contract_id"}, {Name: "event_id"}},
+		DoNothing: true, // Ignore conflicts, do nothing
+	}).CreateInBatches(events, 10).Error
 }

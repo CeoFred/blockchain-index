@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
-		"flag"
+	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -14,7 +14,6 @@ import (
 	"github.com/CeoFred/gin-boilerplate/internal/helpers"
 	"github.com/CeoFred/gin-boilerplate/internal/routes"
 	// "github.com/CeoFred/gin-boilerplate/internal/repository"
-
 
 	_ "golang.org/x/text"
 

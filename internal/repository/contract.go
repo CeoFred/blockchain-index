@@ -81,9 +81,9 @@ func (a *ContractRepository) QueryWithArgs(q string, args ...interface{}) (*mode
 	}
 
 	if contracts.ID.IsNil() {
-		return nil,nil
+		return nil, nil
 	}
-	
+
 	return contracts, nil
 }
 

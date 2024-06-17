@@ -6,6 +6,7 @@ import (
 	"github.com/CeoFred/gin-boilerplate/internal/models"
 	"github.com/gofrs/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type EventInterface interface {
@@ -18,6 +19,7 @@ type EventInterface interface {
 	QueryWithArgs(q string, args ...interface{}) (*models.Event, error)
 	QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.Event, error)
 	RawSmartSelect(q string, res interface{}, args ...interface{}) error
+	BatchInsert(events []*models.Event) ([]*models.Event,error)
 }
 
 type EventRepository struct {
@@ -93,4 +95,30 @@ func (a *EventRepository) QueryRecordsWithArgs(q string, args ...interface{}) ([
 
 func (a *EventRepository) RawSmartSelect(q string, res interface{}, args ...interface{}) error {
 	return a.database.Raw(q, args...).Scan(res).Error
+}
+
+func (a *EventRepository) BatchInsert(events []*models.Event) ([]*models.Event,error) {
+	 err := a.database.Table("events").Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "signature"}},
+		DoUpdates: clause.AssignmentColumns([]string{"description","created_at"},),
+	}).CreateInBatches(events, 10).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract signatures from the events parameter
+	signatures := make([]string, len(events))
+	for i, event := range events {
+		signatures[i] = event.Signature
+	}
+
+	// Retrieve the affected rows based on the signatures
+	var affectedEvents []*models.Event
+	err = a.database.Table("events").Where("signature IN ?", signatures).Find(&affectedEvents).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return affectedEvents, nil
 }
