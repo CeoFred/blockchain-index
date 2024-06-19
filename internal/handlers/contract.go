@@ -38,9 +38,10 @@ func NewContractHandler(contractRepo repository.ContractInterface,
 }
 
 type ContractEventRequest struct {
-	Address string `json:"address" validate:"required,eth_addr"`
-	Name    string `json:"name" validate:"required"`
-	Event   []struct {
+	Address    string `json:"address" validate:"required,eth_addr"`
+	Name       string `json:"name" validate:"required"`
+	StartBlock uint   `json:"start_block" validate:"required"`
+	Event      []struct {
 		Name        string `json:"name" validate:"required"`
 		Description string `json:"description"`
 	} `json:"event" validate:"required"`
@@ -81,11 +82,13 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 			return
 		}
 		contract = &models.Contract{
-			ID:        ID,
-			Name:      input.Name,
-			Address:   input.Address,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			ID:         ID,
+			Name:       input.Name,
+			Address:    input.Address,
+			StartBlock: input.StartBlock,
+			EndBlock:   input.StartBlock,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
 		}
 
 		if err = h.contractRepo.Create(contract); err != nil {
@@ -96,7 +99,7 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 
 	eventSignature := map[string]string{
 		"Transfer":             "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-		"Approval":             "0x8c5be1e5ebec7d5bd14f714f8100de8fa9c6a09d2323b9cfa7f5f2fa1b0cd031",
+		"Approval":             "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
 		"OwnershipTransferred": "0x8c5be1e5ebec7d5bd14f714f8100de8fa9c6a09d2323b9cfa7f5f2fa1b0cd031",
 		"ApprovalForAll":       "0x17307eab39c3af08c0e4369c0d0b8d6a2a97c49ab98d7d621e49e4c0d648d1b1",
 		"Mint":                 "0x7a1b0f670e6e40c8f1e61bdbfd4f0b7886b358c084c5d2c726861b5c0a4e3e3d",
@@ -123,7 +126,7 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 		events = append(events, e)
 	}
 
-	events,err = h.eventRepo.BatchInsert(events) // updates existing records
+	events, err = h.eventRepo.BatchInsert(events) // updates existing records
 	if err != nil {
 		helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
 		return
@@ -141,7 +144,7 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 			ID:         ID,
 			ContractID: contract.ID,
 			EventID:    event.ID,
-			Active:     false,
+			Active:     true,
 			CreatedAt:  time.Now(),
 		}
 

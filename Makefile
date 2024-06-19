@@ -12,6 +12,9 @@ run-local:
 docs-generate:
 	swag init
 
+gen-erc20-binding:
+	abigen --abi=./internal/smartcontract/ABI/ERC20.abi.json --pkg=ERC20 --out=./internal/smartcontract/binding/ERC20.go
+
 requirements:
 	go mod tidy
 

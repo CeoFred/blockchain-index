@@ -52,7 +52,7 @@ func (a *ContractEventRepository) Exists(id uuid.UUID) (bool, error) {
 
 func (a *ContractEventRepository) Where(condition, value string) ([]*models.ContractEvent, error) {
 	var contracts []*models.ContractEvent
-	err := a.database.Raw(fmt.Sprintf(`SELECT * FROM contracts WHERE %s = ?`, condition), value).Scan(&contracts).Error
+	err := a.database.Raw(fmt.Sprintf(`SELECT * FROM contract_events WHERE %s = ?`, condition), value).Preload("Event").Preload("Contract").Find(&contracts).Error
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (a *ContractEventRepository) QueryWithArgs(q string, args ...interface{}) (
 
 func (a *ContractEventRepository) QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.ContractEvent, error) {
 	var contracts []*models.ContractEvent
-	err := a.database.Raw(q, args...).Find(&contracts).Error
+	err := a.database.Raw(q, args...).Preload("Event").Preload("Contract").Find(&contracts).Error
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (a *ContractEventRepository) QueryRecordsWithArgs(q string, args ...interfa
 }
 
 func (a *ContractEventRepository) RawSmartSelect(q string, res interface{}, args ...interface{}) error {
-	return a.database.Raw(q, args...).Scan(res).Error
+	return a.database.Raw(q, args...).Find(res).Error
 }
 
 func (a *ContractEventRepository) BatchInsert(events []*models.ContractEvent) error {

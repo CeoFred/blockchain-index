@@ -19,7 +19,7 @@ type EventInterface interface {
 	QueryWithArgs(q string, args ...interface{}) (*models.Event, error)
 	QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.Event, error)
 	RawSmartSelect(q string, res interface{}, args ...interface{}) error
-	BatchInsert(events []*models.Event) ([]*models.Event,error)
+	BatchInsert(events []*models.Event) ([]*models.Event, error)
 }
 
 type EventRepository struct {
@@ -97,10 +97,10 @@ func (a *EventRepository) RawSmartSelect(q string, res interface{}, args ...inte
 	return a.database.Raw(q, args...).Scan(res).Error
 }
 
-func (a *EventRepository) BatchInsert(events []*models.Event) ([]*models.Event,error) {
-	 err := a.database.Table("events").Clauses(clause.OnConflict{
+func (a *EventRepository) BatchInsert(events []*models.Event) ([]*models.Event, error) {
+	err := a.database.Table("events").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "signature"}},
-		DoUpdates: clause.AssignmentColumns([]string{"description","created_at"},),
+		DoUpdates: clause.AssignmentColumns([]string{"description", "created_at"}),
 	}).CreateInBatches(events, 10).Error
 
 	if err != nil {

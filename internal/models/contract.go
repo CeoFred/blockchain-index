@@ -6,13 +6,22 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+type ContractEventStatus bool
+
+const (
+	ContractEventStatusActive   ContractEventStatus = true
+	ContractEventStatusInactive ContractEventStatus = false
+)
+
 type Contract struct {
-	ID        uuid.UUID `json:"id" gorm:"primaryKey"`
-	Name      string    `json:"name"`
-	Address   string    `json:"address"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	DeletedAt time.Time `json:"deleted_at"`
+	ID         uuid.UUID `json:"id" gorm:"primaryKey"`
+	Name       string    `json:"name"`
+	Address    string    `json:"address"`
+	StartBlock uint      `json:"start_block"`
+	EndBlock   uint      `json:"end_block"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	DeletedAt  time.Time `json:"deleted_at"`
 }
 
 type ContractEvent struct {
@@ -20,11 +29,11 @@ type ContractEvent struct {
 	ContractID uuid.UUID `json:"contract_id" gorm:"uniqueIndex:idx_contract_event"`
 	EventID    uuid.UUID `json:"event_id" gorm:"uniqueIndex:idx_contract_event"`
 
-	Active    bool      `json:"active"`
-	Contract  *Contract `json:"contract" gorm:"foreignKey:ContractID"`
-	Event     *Event    `json:"event" gorm:"foreignKey:EventID"`
-	CreatedAt time.Time `json:"created_at"`
-	DeletedAt time.Time `json:"deleted_at"`
+	Active    ContractEventStatus `json:"active"`
+	Contract  *Contract           `json:"contract" gorm:"foreignKey:ContractID"`
+	Event     *Event              `json:"event" gorm:"foreignKey:EventID"`
+	CreatedAt time.Time           `json:"created_at"`
+	DeletedAt time.Time           `json:"deleted_at"`
 }
 
 func (c *ContractEvent) TableName() string {

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -19,15 +20,18 @@ func (e *Event) TableName() string {
 }
 
 type EventLog struct {
-	ID              uuid.UUID              `json:"id" gorm:"primaryKey"`
-	ContractAddress uuid.UUID              `json:"contract_address"`
-	EventName       string                 `json:"event_name"`
-	BlockNumber     int                    `json:"block_number"`
-	TransactionHash uuid.UUID              `json:"transaction_hash"`
-	LogIndex        uint                   `json:"log_index"`
-	Data            map[string]interface{} `json:"data"`
-	Topics          []string               `json:"topics"`
-	Timestamp       time.Time              `json:"timestamp"`
+	ID              uuid.UUID       `json:"id" gorm:"primaryKey"`
+	ContractEventID uuid.UUID       `json:"contract_event_id"`
+	ContractID      uuid.UUID       `json:"contract_id"`
+	ContractAddress string          `json:"contract_address"`
+	EventName       string          `json:"event_name"`
+	BlockNumber     uint64          `json:"block_number"`
+	TransactionHash string          `json:"transaction_hash"`
+	LogIndex        uint            `json:"log_index"`
+	Data            json.RawMessage `json:"data" gorm:"type:jsonb"`
+	Topics          json.RawMessage `json:"topics" gorm:"type:jsonb"`
+	Timestamp       time.Time       `json:"timestamp"`
+	CreatedAt       time.Time       `json:"created_at"`
 }
 
 func (e *EventLog) TableName() string {

@@ -6,6 +6,7 @@ import (
 	"github.com/CeoFred/gin-boilerplate/internal/models"
 	"github.com/gofrs/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type EventLogInterface interface {
@@ -18,6 +19,7 @@ type EventLogInterface interface {
 	QueryWithArgs(q string, args ...interface{}) (*models.EventLog, error)
 	QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.EventLog, error)
 	RawSmartSelect(q string, res interface{}, args ...interface{}) error
+	BatchInsert(events []*models.EventLog) error
 }
 
 type EventLogRepository struct {
@@ -93,4 +95,11 @@ func (a *EventLogRepository) QueryRecordsWithArgs(q string, args ...interface{})
 
 func (a *EventLogRepository) RawSmartSelect(q string, res interface{}, args ...interface{}) error {
 	return a.database.Raw(q, args...).Scan(res).Error
+}
+
+func (a *EventLogRepository) BatchInsert(events []*models.EventLog) error {
+	return a.database.Table("event_logs").Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "transaction_hash"}, {Name: "block_number"}},
+		DoNothing: true, // Ignore conflicts, do nothing
+	}).CreateInBatches(events, 50).Error
 }
