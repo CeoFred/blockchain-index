@@ -11,6 +11,7 @@ import (
 	"github.com/CeoFred/gin-boilerplate/internal/models"
 	"github.com/CeoFred/gin-boilerplate/internal/repository"
 	"github.com/CeoFred/gin-boilerplate/internal/service"
+	"github.com/gofrs/uuid"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,8 @@ type ContractEventHandler struct {
 	contractEventRepo repository.ContractEventInterface
 	eventRepo         repository.EventInterface
 	eventLogRepo      repository.EventLogInterface
+	userRepo          repository.UserInterface
+	userActionRepo    repository.UserActionInterface
 	blockchainService *service.BlockchainService
 }
 
@@ -29,12 +32,16 @@ func NewContractEventHandler(contractRepo repository.ContractInterface,
 	eventRepo repository.EventInterface,
 	eventLogRepo repository.EventLogInterface,
 	blockchainService *service.BlockchainService,
+	userRepo repository.UserInterface,
+	userActionRepo repository.UserActionInterface,
 ) *ContractEventHandler {
 	return &ContractEventHandler{
 		contractRepo:      contractRepo,
 		contractEventRepo: contractEventRepo,
 		eventRepo:         eventRepo,
 		eventLogRepo:      eventLogRepo,
+		userRepo:          userRepo,
+		userActionRepo:    userActionRepo,
 		blockchainService: blockchainService,
 	}
 }
@@ -84,12 +91,52 @@ func (h *ContractEventHandler) StartPolling() error {
 		log.Printf("total logs found %d", logCount)
 
 		// should check contract type and process logs, by default only erc20 contracts are supported
-		eventLogs := h.blockchainService.ProcessERCTokenLogs(logs, events)
+		eventLogs, userEvents := h.blockchainService.ProcessERCTokenLogs(logs, events)
 
-		err = h.eventLogRepo.BatchInsert(eventLogs)
+		eventLogs,err = h.eventLogRepo.BatchInsert(eventLogs)
 		if err != nil {
 			panic(err)
 		}
+
+		for address, events := range userEvents {
+			// try creating a new user or updating
+			ID, err := uuid.NewV7()
+			if err != nil {
+				return err
+			}
+
+			user := &models.User{
+				ID:        ID,
+				Address:   address,
+				CreatedAt: time.Now(),
+			}
+
+			user,err = h.userRepo.Create(user)
+			if err != nil {
+				return err
+			}
+			
+			actions := []*models.UserAction{}
+			for _, user_action := range events {
+				user_action.UserID = user.ID
+				user_action.CreatedAt = time.Now()
+
+				for _,log := range eventLogs {
+					// get original event log id because it's possible that during insert the new event log id assigned at the blokchain service layer was ignored .. this is to avoid reference errors
+					if log.TransactionHash == user_action.TransactionHash {
+						user_action.EventLogID = log.ID
+					}
+				}
+				actions = append(actions, user_action)
+			}
+			err = h.userActionRepo.BatchInsert(actions)
+			if err != nil {
+				return err
+			}
+
+		}
+
+
 		// Update the last polled block for the contract
 		contractLastBlock[contractAddress] = latestBlock
 		contract, err := h.contractRepo.QueryWithArgs("select * from contracts where address = ?", contractAddress)

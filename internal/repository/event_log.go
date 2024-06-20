@@ -19,7 +19,7 @@ type EventLogInterface interface {
 	QueryWithArgs(q string, args ...interface{}) (*models.EventLog, error)
 	QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.EventLog, error)
 	RawSmartSelect(q string, res interface{}, args ...interface{}) error
-	BatchInsert(events []*models.EventLog) error
+	BatchInsert(event_logs []*models.EventLog) ([]*models.EventLog,error)
 }
 
 type EventLogRepository struct {
@@ -97,9 +97,28 @@ func (a *EventLogRepository) RawSmartSelect(q string, res interface{}, args ...i
 	return a.database.Raw(q, args...).Scan(res).Error
 }
 
-func (a *EventLogRepository) BatchInsert(events []*models.EventLog) error {
-	return a.database.Table("event_logs").Clauses(clause.OnConflict{
+func (a *EventLogRepository) BatchInsert(event_logs []*models.EventLog) ([]*models.EventLog,error) {
+	err := a.database.Table("event_logs").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "transaction_hash"}, {Name: "block_number"}},
 		DoNothing: true, // Ignore conflicts, do nothing
-	}).CreateInBatches(events, 50).Error
+	}).CreateInBatches(event_logs, 50).Error
+
+		if err != nil {
+		return nil, err
+	}
+
+	// Extract transactionhash from the event_logs parameter
+	transactionhash := make([]string, len(event_logs))
+	for i, event := range event_logs {
+		transactionhash[i] = event.TransactionHash
+	}
+
+	// Retrieve the affected rows based on the signatures
+	var affectedLogs []*models.EventLog
+	err = a.database.Table("event_logs").Where("transaction_hash IN ?", transactionhash).Find(&affectedLogs).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return affectedLogs, nil
 }

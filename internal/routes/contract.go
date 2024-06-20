@@ -21,6 +21,8 @@ func RegisterContractRoute(router *gin.RouterGroup, db *gorm.DB) {
 	contractEventRepository := repository.NewContractEventRepository(db)
 	eventRepository := repository.NewEventRepository(db)
 	eventLogRepository := repository.NewEventLogRepository(db)
+	userRepository := repository.NewUserRepository(db)
+	userActionRepository := repository.NewUserActionRepository(db)
 
 	blockchainService, err := service.NewBlockchainService(env.RPC)
 	if err != nil {
@@ -29,7 +31,7 @@ func RegisterContractRoute(router *gin.RouterGroup, db *gorm.DB) {
 	}
 
 	contractHandler := handlers.NewContractHandler(contractRepository, contractEventRepository, eventRepository, eventLogRepository, blockchainService)
-	contractEventHandler := handlers.NewContractEventHandler(contractRepository, contractEventRepository, eventRepository, eventLogRepository, blockchainService)
+	contractEventHandler := handlers.NewContractEventHandler(contractRepository, contractEventRepository, eventRepository, eventLogRepository, blockchainService, userRepository, userActionRepository)
 
 	contract := router.Group("/contract")
 	{

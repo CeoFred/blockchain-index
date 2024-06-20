@@ -22,13 +22,13 @@ import (
 type LogTransfer struct {
 	From  common.Address `json:"from"`
 	To    common.Address `json:"to"`
-	Value *big.Int `json:"value"`
+	Value *big.Int       `json:"value"`
 }
 
 type LogApproval struct {
 	Owner   common.Address `json:"owner"`
 	Spender common.Address `json:"spender"`
-	Value   *big.Int `json:"value"`
+	Value   *big.Int       `json:"value"`
 }
 
 type BlockchainService struct {
@@ -118,7 +118,7 @@ func (b *BlockchainService) QueryLogs(contractAddress string, startBlock, endBlo
 	return logs, nil
 }
 
-func (b *BlockchainService) ProcessERCTokenLogs(logs []types.Log, events []*models.ContractEvent) []*models.EventLog {
+func (b *BlockchainService) ProcessERCTokenLogs(logs []types.Log, events []*models.ContractEvent) ([]*models.EventLog, map[string][]*models.UserAction) {
 
 	eventLogs := []*models.EventLog{}
 
@@ -131,6 +131,8 @@ func (b *BlockchainService) ProcessERCTokenLogs(logs []types.Log, events []*mode
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	userEvents := map[string][]*models.UserAction{}
 
 	for _, elog := range logs {
 		event_signature := elog.Topics[0].Hex()
@@ -174,14 +176,13 @@ func (b *BlockchainService) ProcessERCTokenLogs(logs []types.Log, events []*mode
 					continue
 				}
 
+				var fromAddress common.Address
 				if !isPending { //TODO: handle pending transactions
-					from, err := b.Client.TransactionSender(context.Background(), tx, elog.BlockHash, elog.TxIndex)
+					fromAddress, err = b.Client.TransactionSender(context.Background(), tx, elog.BlockHash, elog.TxIndex)
 					if err != nil {
 						log.Printf("Failed to fetch transaction sender: %v", err)
 						continue
 					}
-					fmt.Printf("Transaction initiated by: %s\n", from.Hex())
-					//TODO: save user event/transaction
 				}
 
 				// PUSH TO EVENT LOGS
@@ -211,7 +212,7 @@ func (b *BlockchainService) ProcessERCTokenLogs(logs []types.Log, events []*mode
 					continue
 				}
 
-				log := &models.EventLog{
+				eventlog := &models.EventLog{
 					ID:              ID,
 					ContractAddress: contract_event.Contract.Address,
 					ContractEventID: contract_event.ID,
@@ -223,14 +224,27 @@ func (b *BlockchainService) ProcessERCTokenLogs(logs []types.Log, events []*mode
 					Data:            dataJSON,
 					Topics:          topicsJSON,
 				}
-				eventLogs = append(eventLogs, log)
+				eventLogs = append(eventLogs, eventlog)
+
+				ActionID, err := uuid.NewV7()
+				if err != nil {
+					log.Printf("Failed to generate event log uuid: %v", err)
+					continue
+				}
+				action := &models.UserAction{
+					ID:              ActionID,
+					Action:          contract_event.Event.Name,
+					EventLogID:      eventlog.ID,
+					TransactionHash: transactionHash,
+				}
+				userEvents[fromAddress.String()] = append(userEvents[fromAddress.String()], action)
 
 			}
 
 		}
 
 	}
-	return eventLogs
+	return eventLogs, userEvents
 }
 
 func (b *BlockchainService) GetTransactionByHash(hash string) {

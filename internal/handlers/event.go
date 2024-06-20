@@ -46,8 +46,6 @@ func (h *EventLogHandler) ContractEvents(c *gin.Context) {
 	from_block := c.Query("from_block")
 	to_block := c.Query("to_block")
 
-
-
 	if !h.blockchainService.IsContract(address) {
 		helpers.ReturnError(c, "Blockchain service error", fmt.Errorf("address is not a contract"), http.StatusBadRequest)
 		return
@@ -65,7 +63,7 @@ func (h *EventLogHandler) ContractEvents(c *gin.Context) {
 		return
 	}
 
-	query := fmt.Sprintf("select * from event_logs where contract_id = '%s' AND contract_address = '%s'",contract.ID, address)
+	query := fmt.Sprintf("select * from event_logs where contract_id = '%s' AND contract_address = '%s'", contract.ID, address)
 
 	if event_name != "" {
 		query += fmt.Sprintf(" AND event_name = '%s'", event_name)
@@ -82,7 +80,7 @@ func (h *EventLogHandler) ContractEvents(c *gin.Context) {
 	if to_block != "" {
 		query += fmt.Sprintf(" AND block_number <= '%s'", to_block)
 	}
-	
+
 	eventLogs, err := h.eventLogRepo.QueryRecordsWithArgs(query)
 
 	if err != nil {

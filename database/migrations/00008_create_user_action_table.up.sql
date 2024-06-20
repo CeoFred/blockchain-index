@@ -1,0 +1,7 @@
+CREATE TABLE user_actions (
+    id UUID PRIMARY KEY,
+    event_log_id UUID NOT NULL REFERENCES event_logs(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    action VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
