@@ -20,15 +20,15 @@ import (
 )
 
 type LogTransfer struct {
-	From  common.Address
-	To    common.Address
-	Value *big.Int
+	From  common.Address `json:"from"`
+	To    common.Address `json:"to"`
+	Value *big.Int `json:"value"`
 }
 
 type LogApproval struct {
-	Owner   common.Address
-	Spender common.Address
-	Value   *big.Int
+	Owner   common.Address `json:"owner"`
+	Spender common.Address `json:"spender"`
+	Value   *big.Int `json:"value"`
 }
 
 type BlockchainService struct {
