@@ -19,7 +19,7 @@ type EventLogInterface interface {
 	QueryWithArgs(q string, args ...interface{}) (*models.EventLog, error)
 	QueryRecordsWithArgs(q string, args ...interface{}) ([]*models.EventLog, error)
 	RawSmartSelect(q string, res interface{}, args ...interface{}) error
-	BatchInsert(event_logs []*models.EventLog) ([]*models.EventLog,error)
+	BatchInsert(event_logs []*models.EventLog) ([]*models.EventLog, error)
 }
 
 type EventLogRepository struct {
@@ -97,13 +97,13 @@ func (a *EventLogRepository) RawSmartSelect(q string, res interface{}, args ...i
 	return a.database.Raw(q, args...).Scan(res).Error
 }
 
-func (a *EventLogRepository) BatchInsert(event_logs []*models.EventLog) ([]*models.EventLog,error) {
+func (a *EventLogRepository) BatchInsert(event_logs []*models.EventLog) ([]*models.EventLog, error) {
 	err := a.database.Table("event_logs").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "transaction_hash"}, {Name: "block_number"}},
 		DoNothing: true, // Ignore conflicts, do nothing
 	}).CreateInBatches(event_logs, 50).Error
 
-		if err != nil {
+	if err != nil {
 		return nil, err
 	}
 

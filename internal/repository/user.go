@@ -13,7 +13,7 @@ type UserInterface interface {
 	Find(id uuid.UUID) (*models.User, error)
 	Exists(id uuid.UUID) (bool, error)
 	Where(condition, value string) ([]*models.User, error)
-	Create(user *models.User) (*models.User,error)
+	Create(user *models.User) (*models.User, error)
 	Save(action *models.User) (*models.User, error)
 	RawCount(q string, count *int64) error
 	QueryWithArgs(q string, args ...interface{}) (*models.User, error)
@@ -59,22 +59,22 @@ func (a *UserRepository) Where(condition, value string) ([]*models.User, error) 
 	return actions, nil
 }
 
-func (a *UserRepository) Create(user *models.User) (*models.User,error) {
+func (a *UserRepository) Create(user *models.User) (*models.User, error) {
 	err := a.database.Table("users").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "address"}},
 		DoNothing: true,
 	}).Create(user).Error
 
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	var u models.User
 	err = a.database.Table("users").Where("address= ?", user.Address).Find(&u).Error
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	return &u,nil
+	return &u, nil
 }
 
 func (a *UserRepository) Save(action *models.User) (*models.User, error) {

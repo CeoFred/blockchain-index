@@ -93,7 +93,7 @@ func (h *ContractEventHandler) StartPolling() error {
 		// should check contract type and process logs, by default only erc20 contracts are supported
 		eventLogs, userEvents := h.blockchainService.ProcessERCTokenLogs(logs, events)
 
-		eventLogs,err = h.eventLogRepo.BatchInsert(eventLogs)
+		eventLogs, err = h.eventLogRepo.BatchInsert(eventLogs)
 		if err != nil {
 			panic(err)
 		}
@@ -111,17 +111,17 @@ func (h *ContractEventHandler) StartPolling() error {
 				CreatedAt: time.Now(),
 			}
 
-			user,err = h.userRepo.Create(user)
+			user, err = h.userRepo.Create(user)
 			if err != nil {
 				return err
 			}
-			
+
 			actions := []*models.UserAction{}
 			for _, user_action := range events {
 				user_action.UserID = user.ID
 				user_action.CreatedAt = time.Now()
 
-				for _,log := range eventLogs {
+				for _, log := range eventLogs {
 					// get original event log id because it's possible that during insert the new event log id assigned at the blokchain service layer was ignored .. this is to avoid reference errors
 					if log.TransactionHash == user_action.TransactionHash {
 						user_action.EventLogID = log.ID
@@ -135,7 +135,6 @@ func (h *ContractEventHandler) StartPolling() error {
 			}
 
 		}
-
 
 		// Update the last polled block for the contract
 		contractLastBlock[contractAddress] = latestBlock
