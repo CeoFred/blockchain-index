@@ -7,21 +7,26 @@ import (
 )
 
 type ContractEventStatus bool
+type ContractCategory string
 
 const (
 	ContractEventStatusActive   ContractEventStatus = true
 	ContractEventStatusInactive ContractEventStatus = false
+
+	ContractCategorySwap  ContractCategory = "swap"
+	ContractCategoryERC20 ContractCategory = "erc20"
 )
 
 type Contract struct {
-	ID         uuid.UUID `json:"id" gorm:"primaryKey"`
-	Name       string    `json:"name"`
-	Address    string    `json:"address"`
-	StartBlock uint      `json:"start_block"`
-	EndBlock   uint      `json:"end_block"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
-	DeletedAt  time.Time `json:"deleted_at"`
+	ID         uuid.UUID        `json:"id" gorm:"primaryKey"`
+	Name       string           `json:"name"`
+	Address    string           `json:"address"`
+	StartBlock uint             `json:"start_block"`
+	EndBlock   uint             `json:"end_block"`
+	Category   ContractCategory `json:"category" default:"erc20"`
+	CreatedAt  time.Time        `json:"created_at"`
+	UpdatedAt  time.Time        `json:"updated_at"`
+	DeletedAt  time.Time        `json:"deleted_at"`
 }
 
 type ContractEvent struct {

@@ -1,0 +1,2 @@
+ALTER TABLE user_actions
+ADD COLUMN point BIGINT DEFAULT 1;

@@ -38,9 +38,10 @@ func NewContractHandler(contractRepo repository.ContractInterface,
 }
 
 type ContractEventRequest struct {
-	Address    string `json:"address" validate:"required,eth_addr"`
-	Name       string `json:"name" validate:"required"`
-	StartBlock uint   `json:"start_block" validate:"required"`
+	Address    string                  `json:"address" validate:"required,eth_addr"`
+	Name       string                  `json:"name" validate:"required"`
+	StartBlock uint                    `json:"start_block" validate:"required"`
+	Category   models.ContractCategory `json:"category" validate:"required"`
 	Event      []struct {
 		Name        string `json:"name" validate:"required"`
 		Description string `json:"description"`
@@ -60,6 +61,14 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 	input, ok := validatedReqBody.(ContractEventRequest)
 	if !ok {
 		helpers.ReturnError(c, "Something went wrong", fmt.Errorf(helpers.REQUEST_BODY_PARSE_ERROR), http.StatusBadRequest)
+		return
+	}
+
+	switch input.Category {
+	case models.ContractCategoryERC20:
+	case models.ContractCategorySwap:
+	default:
+		helpers.ReturnError(c, "Blockchain service error", fmt.Errorf("invalid contract category"), http.StatusBadRequest)
 		return
 	}
 
@@ -87,6 +96,7 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 			Address:    input.Address,
 			StartBlock: input.StartBlock,
 			EndBlock:   input.StartBlock,
+			Category:   input.Category,
 			CreatedAt:  time.Now(),
 			UpdatedAt:  time.Now(),
 		}
@@ -104,6 +114,8 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 		"ApprovalForAll":       "0x17307eab39c3af08c0e4369c0d0b8d6a2a97c49ab98d7d621e49e4c0d648d1b1",
 		"Mint":                 "0x7a1b0f670e6e40c8f1e61bdbfd4f0b7886b358c084c5d2c726861b5c0a4e3e3d",
 		"Burn":                 "0xcc16f5dbb2b993aba1924902705498a8a94a801efed80f968f275b1c338405a9",
+
+		"Swap": "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
 	}
 
 	// create all events
@@ -111,50 +123,53 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 	for i := 0; i < len(input.Event); i++ {
 		event := input.Event[i]
 
-		ID, err := uuid.NewV7()
+		if eventSignature[event.Name] != "" {
+			ID, err := uuid.NewV7()
+			if err != nil {
+				helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
+				return
+			}
+			e := &models.Event{
+				ID:          ID,
+				Name:        event.Name,
+				Signature:   eventSignature[event.Name],
+				Description: event.Description,
+			}
+			events = append(events, e)
+		}
+
+	}
+
+	if len(events) > 0 {
+		events, err = h.eventRepo.BatchInsert(events) // updates existing records
 		if err != nil {
 			helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
 			return
 		}
 
-		e := &models.Event{
-			ID:          ID,
-			Name:        event.Name,
-			Signature:   eventSignature[event.Name],
-			Description: event.Description,
+		contractEvents := []*models.ContractEvent{}
+		for i := 0; i < len(events); i++ {
+			event := events[i]
+			ID, err := uuid.NewV7()
+			if err != nil {
+				helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
+				return
+			}
+			contractEvent := &models.ContractEvent{
+				ID:         ID,
+				ContractID: contract.ID,
+				EventID:    event.ID,
+				Active:     true,
+				CreatedAt:  time.Now(),
+			}
+
+			contractEvents = append(contractEvents, contractEvent)
 		}
-		events = append(events, e)
-	}
-
-	events, err = h.eventRepo.BatchInsert(events) // updates existing records
-	if err != nil {
-		helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
-		return
-	}
-
-	contractEvents := []*models.ContractEvent{}
-	for i := 0; i < len(events); i++ {
-		event := events[i]
-		ID, err := uuid.NewV7()
+		err = h.contractEventRepo.BatchInsert(contractEvents)
 		if err != nil {
 			helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
 			return
 		}
-		contractEvent := &models.ContractEvent{
-			ID:         ID,
-			ContractID: contract.ID,
-			EventID:    event.ID,
-			Active:     true,
-			CreatedAt:  time.Now(),
-		}
-
-		contractEvents = append(contractEvents, contractEvent)
-		fmt.Println(contractEvent.EventID)
-	}
-	err = h.contractEventRepo.BatchInsert(contractEvents)
-	if err != nil {
-		helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
-		return
 	}
 
 	helpers.ReturnJSON(c, "OK", contract, http.StatusOK)

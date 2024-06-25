@@ -14,7 +14,8 @@ func RunManualMigration(dbURL string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// m.Force(8)
+	// m.Force(9)
+
 	if err := m.Up(); err != nil {
 		if err.Error() != "no change" {
 			log.Fatal(err)

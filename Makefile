@@ -13,7 +13,10 @@ docs-generate:
 	swag init
 
 gen-erc20-binding:
-	abigen --abi=./internal/smartcontract/ABI/ERC20.abi.json --pkg=ERC20 --out=./internal/smartcontract/binding/ERC20.go
+	abigen --abi=./internal/smartcontract/ABI/ERC20.abi.json --pkg=ERC20 --out=./internal/smartcontract/binding/ERC20/ERC20.go
+
+gen-pool-swap-binding:
+	abigen --abi=./internal/smartcontract/ABI/PoolSwap.abi.json --pkg=PoolSwap --out=./internal/smartcontract/binding/PoolSwap/PoolSwap.go
 
 requirements:
 	go mod tidy

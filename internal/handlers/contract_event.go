@@ -56,11 +56,13 @@ func (h *ContractEventHandler) StartPolling() error {
 
 	contractEventMap := map[string][]*models.ContractEvent{}
 	contractLastBlock := map[string]uint{}
+	contractMap := map[string]*models.Contract{}
 
 	for _, v := range contract_events {
 		contract_address := v.Contract.Address
 		contractEventMap[contract_address] = append(contractEventMap[contract_address], v)
 		contractLastBlock[contract_address] = v.Contract.EndBlock
+		contractMap[contract_address] = v.Contract
 	}
 
 	// get latest block for contract
@@ -89,9 +91,18 @@ func (h *ContractEventHandler) StartPolling() error {
 		logCount := len(logs)
 
 		log.Printf("total logs found %d", logCount)
+		var eventLogs []*models.EventLog
+		var userEvents map[string][]*models.UserAction
+		contract_category := contractMap[contractAddress].Category
 
-		// should check contract type and process logs, by default only erc20 contracts are supported
-		eventLogs, userEvents := h.blockchainService.ProcessERCTokenLogs(logs, events)
+		switch contract_category {
+		case models.ContractCategoryERC20:
+			eventLogs, userEvents = h.blockchainService.ProcessERCTokenLogs(logs, events)
+		case models.ContractCategorySwap:
+			eventLogs, userEvents = h.blockchainService.ProcessPoolSwapLogs(logs, events)
+		default:
+			panic("unknown contract category")
+		}
 
 		eventLogs, err = h.eventLogRepo.BatchInsert(eventLogs)
 		if err != nil {
