@@ -115,6 +115,15 @@ func (b *BlockchainService) GetLatestBlockNumber() (*big.Int, error) {
 	return header.Number, nil
 }
 
+func (s *BlockchainService) BlockByHash(hash common.Hash) (*types.Block, error) {
+
+	block, err := s.Client.BlockByHash(context.Background(), hash)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return block, nil
+}
+
 func (s *BlockchainService) BlockByNumber(blockNumber uint64) (*types.Block, error) {
 	block, err := s.Client.BlockByNumber(context.Background(), big.NewInt(int64(blockNumber)))
 	if err != nil {
