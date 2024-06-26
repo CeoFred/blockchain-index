@@ -90,3 +90,7 @@ func (h *EventLogHandler) ContractEvents(c *gin.Context) {
 
 	helpers.ReturnJSON(c, "OK", eventLogs, http.StatusOK)
 }
+
+func (h *EventLogHandler) poolFaucetTransfer() {
+	// h.blockchainService.QueryLogs("",600,n)
+}

@@ -61,7 +61,7 @@ func (a *UserActionRepository) Where(condition, value string) ([]*models.UserAct
 
 func (a *UserActionRepository) Create(action *models.UserAction) error {
 	return a.database.Table("user_actions").Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "user_id"}, {Name: "event_log_id"}},
+		Columns:   []clause.Column{{Name: "user_id"}, {Name: "transaction_hash"}},
 		DoNothing: true, // Ignore conflicts, do nothing
 	}).Create(action).Error
 }

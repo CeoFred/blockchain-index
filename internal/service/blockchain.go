@@ -115,9 +115,28 @@ func (b *BlockchainService) GetLatestBlockNumber() (*big.Int, error) {
 	return header.Number, nil
 }
 
-func (b *BlockchainService) QueryLogs(contractAddress string, startBlock, endBlock uint) ([]types.Log, error) {
+func (s *BlockchainService) BlockByNumber(blockNumber uint64) (*types.Block, error) {
+	block, err := s.Client.BlockByNumber(context.Background(), big.NewInt(int64(blockNumber)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get block: %w", err)
+	}
+	return block, nil
+}
+
+func (b *BlockchainService) BlockTransaction(blockNum uint) (types.Transactions, error) {
+	blockNumber := big.NewInt(int64(blockNum))
+
+	block, err := b.Client.BlockByNumber(context.Background(), blockNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	return block.Transactions(), nil
+}
+
+func (b *BlockchainService) QueryLogs(address string, startBlock, endBlock uint) ([]types.Log, error) {
 	query := ethereum.FilterQuery{
-		Addresses: []common.Address{common.HexToAddress(contractAddress)},
+		Addresses: []common.Address{common.HexToAddress(address)},
 		FromBlock: big.NewInt(int64(startBlock)),
 		ToBlock:   big.NewInt(int64(endBlock)),
 	}
@@ -239,6 +258,7 @@ func (b *BlockchainService) ProcessPoolSwapLogs(logs []types.Log, events []*mode
 					Action:          contract_event.Event.Name,
 					EventLogID:      eventlog.ID,
 					TransactionHash: transactionHash,
+					Point:           1,
 				}
 				userEvents[fromAddress.String()] = append(userEvents[fromAddress.String()], action)
 
@@ -368,6 +388,7 @@ func (b *BlockchainService) ProcessERCTokenLogs(logs []types.Log, events []*mode
 					Action:          contract_event.Event.Name,
 					EventLogID:      eventlog.ID,
 					TransactionHash: transactionHash,
+					Point:           1,
 				}
 				userEvents[fromAddress.String()] = append(userEvents[fromAddress.String()], action)
 

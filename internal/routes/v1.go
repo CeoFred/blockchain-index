@@ -9,5 +9,6 @@ func Routes(r *gin.RouterGroup, db *gorm.DB) {
 
 	RegisterContractRoute(r, db)
 	RegisterEventLogRoute(r, db)
+	RegisterFaucetRoute(r, db)
 
 }

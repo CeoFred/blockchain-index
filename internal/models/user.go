@@ -12,6 +12,7 @@ type UserAction struct {
 	TransactionHash string    `json:"transaction_hash"`
 	EventLog        *EventLog `json:"event_log" gorm:"foreignKey:EventLogID"`
 	UserID          uuid.UUID `json:"user_id"`
+	Point           uint      `json:"point"`
 	Action          string    `json:"action"`
 	User            *User     `json:"user" gorm:"foreignKey:UserID"`
 	CreatedAt       time.Time `json:"created_at"`
