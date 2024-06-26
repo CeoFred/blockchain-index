@@ -43,7 +43,6 @@ func RegisterContractRoute(router *gin.RouterGroup, db *gorm.DB) {
 		contractEvent.GET("/:address", contractEventHandler.GetContractEvents)
 	}
 
-	// Start Event Subscription in a Goroutine
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()

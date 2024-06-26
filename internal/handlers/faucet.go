@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"math/big"
@@ -122,25 +121,34 @@ func (h *FaucetHandler) ProcessBlock() error {
 func (h *FaucetHandler) ListenForNewBlocks(faucet *models.Faucet) {
 
 	log.Println("now listening for new blocks")
-	headers := make(chan *types.Header)
 
-	sub, err := h.blockchainService.Client.SubscribeNewHead(context.Background(), headers)
-	if err != nil {
-		log.Fatal("failed to subscribe to new block: ",err)
-	}
-	for {
-		select {
-		case err := <-sub.Err():
-			log.Fatal(err)
-		case header := <-headers:
-			fmt.Println("new block added ",header.Hash().Hex())
-			block, err := h.blockchainService.BlockByHash(header.Hash())
-			if err != nil {
-				panic(err)
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		faucet, err := h.faucetRepo.Find(faucet.ID)
+		if err != nil {
+			panic(err)
+		}
+		latestBlockNumber, err := h.blockchainService.GetLatestBlockNumber()
+		if err != nil {
+			panic(err)
+		}
+		latestBlock := uint(latestBlockNumber.Uint64())
+		startBlock := faucet.EndBlock + 1
+		if latestBlock >= startBlock {
+			log.Printf("new block mined: %d", startBlock)
+			for i := latestBlock; i >= startBlock; i-- {
+				block, err := h.blockchainService.BlockByNumber(uint64(i))
+				if err != nil {
+					panic(err)
+				}
+				go h.ProcessTransactions(faucet, block, block.Transactions())
 			}
-			go h.ProcessTransactions(faucet, block, block.Transactions())
 		}
 	}
+
+
 }
 
 func (h *FaucetHandler) ProcessTransactions(f *models.Faucet, block *types.Block, logs types.Transactions) {
