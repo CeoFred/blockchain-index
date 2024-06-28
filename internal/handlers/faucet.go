@@ -138,7 +138,7 @@ func (h *FaucetHandler) ListenForNewBlocks(faucet *models.Faucet) {
 		startBlock := faucet.EndBlock + 1
 		if latestBlock >= startBlock {
 			log.Printf("new block mined: %d", startBlock)
-			for i := latestBlock; i >= startBlock; i-- {
+			for i := startBlock; i <= latestBlock; i++ {
 				block, err := h.blockchainService.BlockByNumber(uint64(i))
 				if err != nil {
 					panic(err)
@@ -147,7 +147,6 @@ func (h *FaucetHandler) ListenForNewBlocks(faucet *models.Faucet) {
 			}
 		}
 	}
-
 
 }
 

@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/CeoFred/gin-boilerplate/internal/smartcontract/binding/Bridge"
 	"github.com/CeoFred/gin-boilerplate/internal/smartcontract/binding/ERC20"
 	"github.com/CeoFred/gin-boilerplate/internal/smartcontract/binding/PoolSwap"
 
@@ -43,6 +44,24 @@ type LogSwap struct {
 	Tick         *big.Int       `json:"tick"`
 }
 
+type LogBridgeSentTokens struct {
+	FromUser     common.Address `json:"from_user"`
+	ToUser       common.Address `json:"to_user"`
+	FromChain    string         `json:"from_chain"`
+	ToChain      string         `json:"to_chain"`
+	Amount       *big.Int       `json:"amount"`
+	ExchangeRate *big.Int       `json:"exchange_rate"`
+	Raw          types.Log      // Blockchain specific contextual infos
+}
+type LogBridgeFulfilledTokens struct {
+	FromUser     common.Address `json:"from_user"`
+	ToUser       common.Address `json:"to_user"`
+	FromChain    string         `json:"from_chain"`
+	ToChain      string         `json:"to_chain"`
+	Amount       *big.Int       `json:"amount"`
+	ExchangeRate *big.Int       `json:"exchange_rate"`
+	Raw          types.Log      // Blockchain specific contextual infos
+}
 type BlockchainService struct {
 	Client          *ethclient.Client
 	ContractABI     abi.ABI
@@ -156,6 +175,133 @@ func (b *BlockchainService) QueryLogs(address string, startBlock, endBlock uint)
 	}
 
 	return logs, nil
+}
+func (b *BlockchainService) ProcessTokenBridge(logs []types.Log, events []*models.ContractEvent) ([]*models.EventLog, map[string][]*models.UserAction) {
+	eventLogs := []*models.EventLog{}
+
+	eventStructMap := map[string]interface{}{
+		"FulfilledTokens": new(LogBridgeFulfilledTokens),
+		"SentTokens":      new(LogBridgeSentTokens),
+	}
+
+	contractAbi, err := abi.JSON(strings.NewReader(string(Bridge.BridgeABI)))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userEvents := map[string][]*models.UserAction{}
+
+	for _, elog := range logs {
+		event_signature := elog.Topics[0].Hex()
+		fmt.Println(event_signature, "\n")
+		for _, contract_event := range events {
+
+			if contract_event.Event.Signature == event_signature {
+
+				t, ok := eventStructMap[contract_event.Event.Name]
+				if !ok {
+					log.Printf("Unknown event name: %s", contract_event.Event.Name)
+					continue
+				}
+
+				err := contractAbi.UnpackIntoInterface(t, contract_event.Event.Name, elog.Data)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				var eventData interface{}
+
+				switch eventType := t.(type) {
+				case *LogBridgeSentTokens:
+					eventType.ToUser = common.HexToAddress(elog.Topics[1].Hex())
+					eventData = eventType
+
+					fmt.Printf("Processed Sent Tokens event: FromUser=%s,ToUser=%s,FromChain=%s,ToChain=%s,Amount=%d,ExchangeRate=%d \n", eventType.FromUser.Hex(), eventType.ToUser.Hex(), eventType.FromChain, eventType.ToChain, eventType.Amount, eventType.ExchangeRate)
+				case *LogBridgeFulfilledTokens:
+					eventType.FromUser = common.HexToAddress(elog.Topics[1].Hex())
+					eventData = eventType
+
+					fmt.Printf("Processed Fulfilled Tokens Event: FromUser=%s,ToUser=%s,FromChain=%s,ToChain=%s,Amount=%d,ExchangeRate=%d \n", eventType.FromUser.Hex(), eventType.ToUser.Hex(), eventType.FromChain, eventType.ToChain, eventType.Amount, eventType.ExchangeRate)
+
+				default:
+					log.Printf("Unhandled event type: %T", eventType)
+				}
+
+				tx, isPending, err := b.Client.TransactionByHash(context.Background(), elog.TxHash)
+				if err != nil {
+					log.Printf("Failed to fetch transaction by hash: %v", err)
+					continue
+				}
+
+				var fromAddress common.Address
+				if !isPending {
+					fromAddress, err = b.Client.TransactionSender(context.Background(), tx, elog.BlockHash, elog.TxIndex)
+					if err != nil {
+						log.Printf("Failed to fetch transaction sender: %v", err)
+						continue
+					}
+				}
+
+				ID, err := uuid.NewV7()
+				if err != nil {
+					log.Printf("Failed to generate event log uuid: %v", err)
+					continue
+				}
+				blockNumber := elog.BlockNumber
+				transactionHash := elog.TxHash.Hex()
+				logIndex := elog.Index
+
+				data := map[string]interface{}{
+					"raw":       fmt.Sprintf("%x", elog.Data),
+					"formatted": eventData,
+				}
+
+				dataJSON, err := json.Marshal(data)
+				if err != nil {
+					log.Printf("Failed to marshal event data: %v", err)
+					continue
+				}
+
+				topicsJSON, err := json.Marshal(elog.Topics)
+				if err != nil {
+					log.Printf("Failed to marshal topics: %v", err)
+					continue
+				}
+
+				eventlog := &models.EventLog{
+					ID:              ID,
+					ContractAddress: contract_event.Contract.Address,
+					ContractEventID: contract_event.ID,
+					EventName:       contract_event.Event.Name,
+					ContractID:      contract_event.Contract.ID,
+					BlockNumber:     blockNumber,
+					TransactionHash: transactionHash,
+					LogIndex:        logIndex,
+					Data:            dataJSON,
+					Topics:          topicsJSON,
+				}
+				eventLogs = append(eventLogs, eventlog)
+
+				ActionID, err := uuid.NewV7()
+				if err != nil {
+					log.Printf("Failed to generate event log uuid: %v", err)
+					continue
+				}
+				action := &models.UserAction{
+					ID:              ActionID,
+					Action:          contract_event.Event.Name,
+					EventLogID:      eventlog.ID,
+					TransactionHash: transactionHash,
+					Point:           1,
+				}
+				userEvents[fromAddress.String()] = append(userEvents[fromAddress.String()], action)
+
+			}
+
+		}
+
+	}
+	return eventLogs, userEvents
 }
 
 func (b *BlockchainService) ProcessPoolSwapLogs(logs []types.Log, events []*models.ContractEvent) ([]*models.EventLog, map[string][]*models.UserAction) {

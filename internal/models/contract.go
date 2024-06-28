@@ -13,8 +13,9 @@ const (
 	ContractEventStatusActive   ContractEventStatus = true
 	ContractEventStatusInactive ContractEventStatus = false
 
-	ContractCategorySwap  ContractCategory = "swap"
-	ContractCategoryERC20 ContractCategory = "erc20"
+	ContractCategorySwap   ContractCategory = "swap"
+	ContractCategoryERC20  ContractCategory = "erc20"
+	ContractCategoryBridge ContractCategory = "bridge"
 )
 
 type Contract struct {

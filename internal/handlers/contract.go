@@ -67,6 +67,7 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 	switch input.Category {
 	case models.ContractCategoryERC20:
 	case models.ContractCategorySwap:
+	case models.ContractCategoryBridge:
 	default:
 		helpers.ReturnError(c, "Blockchain service error", fmt.Errorf("invalid contract category"), http.StatusBadRequest)
 		return
@@ -116,6 +117,9 @@ func (h *ContractHandler) NewContractIndex(c *gin.Context) {
 		"Burn":                 "0xcc16f5dbb2b993aba1924902705498a8a94a801efed80f968f275b1c338405a9",
 
 		"Swap": "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+		// bridge events
+		"FulfilledTokens": "0x1a82954c00ba4231b18dbc7d7d5187028cfc140ac6efedeeb60397b8710a9d93",
+		"SentTokens":      "0x39ca9eb9de2c42145bdc9525fbfac365c3f8e2abdf97dd94e64ec1258365b9f7",
 	}
 
 	// create all events

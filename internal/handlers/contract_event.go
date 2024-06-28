@@ -77,7 +77,7 @@ func (h *ContractEventHandler) StartPolling() error {
 
 		startBlock := contractLastBlock[contractAddress] + 1
 		if startBlock > latestBlock {
-			log.Printf("\n no logs available for contract %s \n", contractAddress)
+			log.Printf("\n no new block, contract: %s \n", contractAddress)
 			continue // No new blocks to poll
 		}
 
@@ -100,6 +100,8 @@ func (h *ContractEventHandler) StartPolling() error {
 			eventLogs, userEvents = h.blockchainService.ProcessERCTokenLogs(logs, events)
 		case models.ContractCategorySwap:
 			eventLogs, userEvents = h.blockchainService.ProcessPoolSwapLogs(logs, events)
+		case models.ContractCategoryBridge:
+			eventLogs, userEvents = h.blockchainService.ProcessTokenBridge(logs, events)
 		default:
 			panic("unknown contract category")
 		}

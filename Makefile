@@ -18,6 +18,9 @@ gen-erc20-binding:
 gen-pool-swap-binding:
 	abigen --abi=./internal/smartcontract/ABI/PoolSwap.abi.json --pkg=PoolSwap --out=./internal/smartcontract/binding/PoolSwap/PoolSwap.go
 
+gen-bridge-binding:
+	abigen --abi=./internal/smartcontract/ABI/Bridge.abi.json --pkg=Bridge --out=./internal/smartcontract/binding/Bridge/Bridge.go
+
 requirements:
 	go mod tidy
 
