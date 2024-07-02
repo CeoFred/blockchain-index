@@ -15,11 +15,13 @@ import (
 )
 
 type EventLogHandler struct {
-	contractRepo      repository.ContractInterface
-	contractEventRepo repository.ContractEventInterface
-	eventRepo         repository.EventInterface
-	eventLogRepo      repository.EventLogInterface
-	blockchainService *service.BlockchainService
+	contractRepo         repository.ContractInterface
+	contractEventRepo    repository.ContractEventInterface
+	eventRepo            repository.EventInterface
+	eventLogRepo         repository.EventLogInterface
+	blockchainService    *service.BlockchainService
+	userActionRepository repository.UserActionInterface
+	userRepository       repository.UserInterface
 }
 
 func NewEventLogHandler(contractRepo repository.ContractInterface,
@@ -27,14 +29,60 @@ func NewEventLogHandler(contractRepo repository.ContractInterface,
 	eventRepo repository.EventInterface,
 	eventLogRepo repository.EventLogInterface,
 	blockchainService *service.BlockchainService,
+	userActionRepository repository.UserActionInterface,
+	userRepository repository.UserInterface,
 ) *EventLogHandler {
 	return &EventLogHandler{
-		contractRepo:      contractRepo,
-		contractEventRepo: contractEventRepo,
-		eventRepo:         eventRepo,
-		eventLogRepo:      eventLogRepo,
-		blockchainService: blockchainService,
+		contractRepo:         contractRepo,
+		contractEventRepo:    contractEventRepo,
+		eventRepo:            eventRepo,
+		eventLogRepo:         eventLogRepo,
+		blockchainService:    blockchainService,
+		userActionRepository: userActionRepository,
+		userRepository:       userRepository,
 	}
+}
+
+func (h *EventLogHandler) UsersContractEvents(c *gin.Context) {
+	address := c.Param("address")
+
+	if address == "" {
+		helpers.ReturnError(c, "Request error", fmt.Errorf("address is required"), http.StatusBadRequest)
+		return
+	}
+
+	user_address := c.Param("user_address")
+	if user_address == "" {
+		helpers.ReturnError(c, "Request error", fmt.Errorf("user  address is required"), http.StatusBadRequest)
+		return
+	}
+
+	contract, err := h.contractRepo.QueryWithArgs("select * from contracts where address = ?", address)
+
+	if err != nil {
+		helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
+		return
+	}
+
+	if contract == nil {
+		helpers.ReturnError(c, "Something went wrong", fmt.Errorf("contract address %s not found", address), http.StatusNotFound)
+		return
+	}
+
+	query := `SELECT el.*
+FROM event_logs el
+JOIN user_actions ua ON el.id = ua.event_log_id
+JOIN users u ON ua.user_id = u.id
+WHERE u.address = ? AND el.contract_address = ?;
+`
+
+	logs, err := h.eventLogRepo.QueryRecordsWithArgs(query, user_address, address)
+	if err != nil {
+		helpers.ReturnError(c, "Something went wrong", err, http.StatusInternalServerError)
+		return
+	}
+
+	helpers.ReturnJSON(c, "Logs returned", logs, http.StatusOK)
 }
 
 func (h *EventLogHandler) ContractEvents(c *gin.Context) {

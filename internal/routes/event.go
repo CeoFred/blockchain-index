@@ -19,6 +19,8 @@ func RegisterEventLogRoute(router *gin.RouterGroup, db *gorm.DB) {
 	contractEventRepository := repository.NewContractEventRepository(db)
 	eventRepository := repository.NewEventRepository(db)
 	eventLogRepository := repository.NewEventLogRepository(db)
+	userActionRepository := repository.NewUserActionRepository(db)
+	userRepository := repository.NewUserRepository(db)
 
 	blockchainService, err := service.NewBlockchainService(env.RPC)
 	if err != nil {
@@ -26,11 +28,13 @@ func RegisterEventLogRoute(router *gin.RouterGroup, db *gorm.DB) {
 		return
 	}
 
-	eventHandler := handlers.NewEventLogHandler(contractRepository, contractEventRepository, eventRepository, eventLogRepository, blockchainService)
+	eventHandler := handlers.NewEventLogHandler(contractRepository, contractEventRepository, eventRepository, eventLogRepository, blockchainService, userActionRepository, userRepository)
 
 	contract := router.Group("/logs")
 	{
 		contract.GET("/:address", eventHandler.ContractEvents)
+		contract.GET("/:address/user/:user_address", eventHandler.UsersContractEvents)
+
 	}
 
 }
