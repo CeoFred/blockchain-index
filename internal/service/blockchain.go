@@ -193,7 +193,6 @@ func (b *BlockchainService) ProcessTokenBridge(logs []types.Log, events []*model
 
 	for _, elog := range logs {
 		event_signature := elog.Topics[0].Hex()
-		fmt.Println(event_signature, "\n")
 		for _, contract_event := range events {
 
 			if contract_event.Event.Signature == event_signature {
