@@ -14,7 +14,6 @@ import (
 
 func RegisterEventLogRoute(router *gin.RouterGroup, db *gorm.DB) {
 	env := constants.New()
-
 	contractRepository := repository.NewContractRepository(db)
 	contractEventRepository := repository.NewContractEventRepository(db)
 	eventRepository := repository.NewEventRepository(db)

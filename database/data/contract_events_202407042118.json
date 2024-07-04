@@ -1,0 +1,51 @@
+{
+"contract_events": [
+	{
+		"id" : "01905e79-ddf3-7ea9-ae16-e4adbd9146b3",
+		"contract_id" : "01905e79-dde9-7ea8-a8a0-74e0fa0715de",
+		"event_id" : "01905e79-ddf0-7ea8-917c-6c862df1016f",
+		"active" : true,
+		"created_at" : "2024-06-28T10:52:43.379Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z"
+	},
+	{
+		"id" : "01905e79-ddf3-7eaa-9e1c-587a944cc067",
+		"contract_id" : "01905e79-dde9-7ea8-a8a0-74e0fa0715de",
+		"event_id" : "01905e79-ddf0-7ea9-b350-6a4e02493d71",
+		"active" : true,
+		"created_at" : "2024-06-28T10:52:43.379Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z"
+	},
+	{
+		"id" : "01905eb4-b971-703e-a7f7-2fb2f0712596",
+		"contract_id" : "01905eb4-b969-703d-b955-e53111142108",
+		"event_id" : "01905e79-ddf0-7ea8-917c-6c862df1016f",
+		"active" : true,
+		"created_at" : "2024-06-28T11:57:00.657Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z"
+	},
+	{
+		"id" : "01905eb4-b971-703f-a143-f9983db3e4ea",
+		"contract_id" : "01905eb4-b969-703d-b955-e53111142108",
+		"event_id" : "01905e79-ddf0-7ea9-b350-6a4e02493d71",
+		"active" : true,
+		"created_at" : "2024-06-28T11:57:00.657Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z"
+	},
+	{
+		"id" : "01905eb9-5856-704a-ba58-a75f476af630",
+		"contract_id" : "01905eb9-584d-704a-b50c-978c350ecd34",
+		"event_id" : "01905eb9-5854-704a-a919-30ed232c1ba3",
+		"active" : true,
+		"created_at" : "2024-06-28T12:02:03.478Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z"
+	},
+	{
+		"id" : "01905eb9-9856-704b-83b7-7a8d8120a767",
+		"contract_id" : "01905eb9-984e-704b-afd9-95a1449858d9",
+		"event_id" : "01905eb9-9854-704b-a9ca-4773a6c4ba0f",
+		"active" : true,
+		"created_at" : "2024-06-28T12:02:19.862Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z"
+	}
+]}

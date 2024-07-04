@@ -1,0 +1,47 @@
+{
+"contracts": [
+	{
+		"id" : "01905e79-dde9-7ea8-a8a0-74e0fa0715de",
+		"address" : "0xE1c83d0Be5a341120A59507a891Ab007FF5954F0",
+		"name" : "RWA Bridge. contract",
+		"created_at" : "2024-06-28T10:52:43.369Z",
+		"updated_at" : "2024-07-02T18:31:27.629Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z",
+		"start_block" : 6177,
+		"end_block" : 9802,
+		"category" : "bridge"
+	},
+	{
+		"id" : "01905eb4-b969-703d-b955-e53111142108",
+		"address" : "0x02C69440Fc8E13d16F9bB53B562ceC405341eFcB",
+		"name" : "USDC Bridge contract",
+		"created_at" : "2024-06-28T11:57:00.649Z",
+		"updated_at" : "2024-07-02T18:31:27.783Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z",
+		"start_block" : 6177,
+		"end_block" : 9802,
+		"category" : "bridge"
+	},
+	{
+		"id" : "01905eb9-584d-704a-b50c-978c350ecd34",
+		"address" : "0xc2fC459EF4a5Bba93C5b03979B1072b387bf9f8c",
+		"name" : "$BEER &. $WATER Pool contract",
+		"created_at" : "2024-06-28T12:02:03.469Z",
+		"updated_at" : "2024-07-02T18:31:28.231Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z",
+		"start_block" : 6177,
+		"end_block" : 9802,
+		"category" : "swap"
+	},
+	{
+		"id" : "01905eb9-984e-704b-afd9-95a1449858d9",
+		"address" : "0xF1DCdbF868FFE597Bced02C099D3D14d1E92ddD0",
+		"name" : "$MEEGLE Token",
+		"created_at" : "2024-06-28T12:02:19.854Z",
+		"updated_at" : "2024-07-02T18:31:28.398Z",
+		"deleted_at" : "0001-12-29T23:00:00.000Z",
+		"start_block" : 6177,
+		"end_block" : 9802,
+		"category" : "erc20"
+	}
+]}
