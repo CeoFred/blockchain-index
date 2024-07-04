@@ -77,10 +77,6 @@ Once the project is running, it will start listening for blockchain events and i
 
 ## API Endpoints
 
-Sure, here is the specific section for adding a contract to the index in the `README.md`:
-
----
-
 ### Add a Contract to Index
 
 To add a contract to the index, use the following API endpoint:
@@ -135,8 +131,6 @@ curl -X POST {{HOST}}/api/v1/contract \
          }'
 ```
 
----
-Here is the section for retrieving events under a specific contract address in the `README.md`:
 
 ---
 
@@ -182,7 +176,6 @@ To retrieve events under a specific contract address, use the following API endp
     "status": true
 }
 ```
-Here is the section for retrieving all event logs with optional query parameters in the `README.md`:
 
 ---
 
